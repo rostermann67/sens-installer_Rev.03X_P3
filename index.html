@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SENS Installer NEXT — Distribuição Rev.03X | Firmware Rev.03N</title>
+<title>SENS Installer NEXT — Distribuição Rev.03Y RTC | Firmware Rev.03P</title>
 <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
 <style>
 :root{font-family:Arial,sans-serif;color:#152019;background:#f4f6f5}
@@ -49,10 +49,11 @@ details.config-group>summary{font-weight:800;color:#176b3a;cursor:pointer}
 .generic-layer h3{margin:0 0 10px;font-size:1rem;color:#176b3a}
 .generic-layer label[hidden]{display:none!important}
 .generic-interface-hint{margin:0 0 8px;grid-column:1/-1}
+#rtcEnabled{width:auto;flex:0 0 auto;margin:0}.rtc-option{justify-content:flex-start;gap:10px}
 </style>
 </head>
 <body>
-<header><h1>SENS INSTALLER NEXT</h1><div>Instalação e configuração de equipamentos SENS</div><div style="margin-top:7px;font-size:.9rem;opacity:.9">Distribuição Rev.03X • Firmware SENS NEXT Universal Rev.03N</div></header>
+<header><h1>SENS INSTALLER NEXT</h1><div>Instalação e configuração de equipamentos SENS</div><div style="margin-top:7px;font-size:.9rem;opacity:.9">Distribuição Rev.03Y RTC • Firmware SENS NEXT Universal Rev.03P</div></header>
 <main>
 <section class="card" id="preconfigCard">
 <div class="step">ETAPA 1 — CONFIGURAÇÃO DO EQUIPAMENTO</div><h2>Configure o SENS antes de instalar</h2>
@@ -87,11 +88,20 @@ details.config-group>summary{font-weight:800;color:#176b3a;cursor:pointer}
 </div>
 <div class="smallnote">Catálogo = conveniência. Instrumentos fora do catálogo entram por INTERFACE / DRIVER ou CONVERSOR.</div></fieldset>
 
+<details class="config-group" open><summary>Relógio e operação sem internet</summary>
+<label class="checkitem rtc-option"><input type="checkbox" id="rtcEnabled"> <b>Usar RTC com bateria — DS3231 (opcional)</b></label>
+<p class="smallnote">Preserva a hora UTC ao desligar e ligar sem rede. O NTP tem prioridade e ajusta o RTC automaticamente. Sem módulo, deixe desmarcado.</p>
+<p class="smallnote">Ligação: 3V3, GND, SDA GPIO21 e SCL GPIO22 • endereço I²C 0x68. Compartilha o barramento dos sensores; não pode compartilhar o endereço com outro dispositivo.</p>
+<p class="smallnote">Guarde a opção e conclua a Etapa 3 antes de verificar ou ajustar. Feche o monitor de logs e qualquer outra conexão serial. A configuração do RTC não altera os pacotes já preservados.</p>
+<div class="actions"><button id="rtcCheck" type="button">VERIFICAR RTC</button><button id="rtcSet" type="button">AJUSTAR PELA HORA DO COMPUTADOR</button></div>
+<div id="rtcStatus" class="status">RTC desmarcado por padrão. Ajuste inicial necessário antes de usar sem rede.</div>
+</details>
+
 <details class="config-group"><summary>INTERFACES / DRIVERS</summary>
   <details class="config-group" style="margin-top:12px"><summary>UART</summary>
     <div style="margin-top:12px">
       <b>UART GENÉRICA — preparação</b>
-      <div class="smallnote" style="margin-top:8px"><b>Firmware Rev.03N:</b> o T6613 continua funcional pelo driver UART consolidado. Os campos abaixo preparam/documentam uma futura UART genérica, mas ainda não ativam leitura científica de protocolos arbitrários no firmware.</div>
+      <div class="smallnote" style="margin-top:8px"><b>Firmware Rev.03P:</b> o T6613 continua funcional pelo driver UART consolidado. Os campos abaixo preparam/documentam uma futura UART genérica, mas ainda não ativam leitura científica de protocolos arbitrários no firmware.</div>
       <div class="config-grid" style="margin-top:12px">
         <label>Instrumento / modelo<input id="uart_model" placeholder="Ex.: analisador CH4"></label>
         <label>Grandeza<input id="uart_qty" placeholder="Ex.: methane"></label>
@@ -108,7 +118,7 @@ details.config-group>summary{font-weight:800;color:#176b3a;cursor:pointer}
 <details class="config-group"><summary>CONVERSORES</summary>
   <details class="config-group" style="margin-top:12px"><summary>ADC-I²C / ADS1115</summary>
     <label class="checkitem" style="margin-top:12px"><input type="checkbox" id="s_converter"> <b>ATIVAR CONVERSOR ADS1115</b></label>
-    <div class="warn" style="margin-top:10px"><b>Firmware Rev.03N:</b> ADS1115 já é operacional para CO₂/ppm. Outras grandezas podem ser selecionadas abaixo para preparar/documentar a configuração, mas só passam a ser saída científica quando o firmware ganhar o mapeamento genérico correspondente.</div>
+    <div class="warn" style="margin-top:10px"><b>Firmware Rev.03P:</b> ADS1115 já é operacional para CO₂/ppm. Outras grandezas podem ser selecionadas abaixo para preparar/documentar a configuração, mas só passam a ser saída científica quando o firmware ganhar o mapeamento genérico correspondente.</div>
     <div class="config-grid" style="margin-top:12px">
       <label>Instrumento / modelo<input id="conv_model" placeholder="Ex.: Telaire T8100 (metadado)"></label>
       <label>Grandeza<select id="conv_qty"><option value="co2">CO₂</option><option value="temperature">Temperatura</option><option value="humidity">Umidade</option><option value="pressure">Pressão</option><option value="methane">CH₄ / Metano</option><option value="n2o">N₂O</option><option value="flow">Vazão</option><option value="custom">Outra / personalizada</option></select></label>
@@ -126,7 +136,7 @@ details.config-group>summary{font-weight:800;color:#176b3a;cursor:pointer}
       <label>Warm-up<select id="warm"><option value="1">INSTANTÂNEO</option><option value="0">MÉDIA PARCIAL</option></select></label>
       <select id="tmode" style="display:none"><option value="1" selected>ANALÓGICO</option><option value="2">UART</option><option value="3">AMBOS</option></select>
     </div>
-    <div id="convCompat" class="smallnote" style="margin-top:8px;font-weight:700">Compatibilidade do conversor legado preservada no FW03M.</div>
+    <div id="convCompat" class="smallnote" style="margin-top:8px;font-weight:700">Compatibilidade do conversor legado preservada no FW03P.</div>
   </details>
 </details>
 <details class="config-group"><summary>Intervalos de leitura</summary><div class="config-grid" style="margin-top:12px">
@@ -136,7 +146,7 @@ details.config-group>summary{font-weight:800;color:#176b3a;cursor:pointer}
 <label>Termopar K ms<input id="i_th" value="2000"></label><label>GPS ms<input id="i_gps" value="1000"></label></div></details>
 <details class="config-group"><summary>Mapa de pinos / recursos</summary><div class="pinmap" style="margin-top:12px">
 <div><b>GPIO4</b> DHT22</div><div><b>GPIO13</b> DS18B20</div><div><b>GPIO35</b> T6613 ADC</div><div><b>GPIO16/17</b> T6613 UART</div>
-<div><b>GPIO21/22</b> I²C compartilhado</div><div><b>GPIO18/5/19</b> MAX6675</div><div><b id="yfPinMap">GPIO23</b> YF-S201 (quando ativo)</div><div><b>0x48</b> ADS1115</div><div><b>0x23</b> BH1750</div><div><b>0x39</b> APDS9960</div></div>
+<div><b>GPIO21/22</b> I²C compartilhado</div><div><b>GPIO18/5/19</b> MAX6675</div><div><b id="yfPinMap">GPIO23</b> YF-S201 (quando ativo)</div><div><b>0x48</b> ADS1115</div><div><b>0x23</b> BH1750</div><div><b>0x39</b> APDS9960</div><div><b>0x68</b> RTC DS3231 (opcional)</div></div>
 <div id="pinWarnings" class="warn">Mapa ativo. Conflitos de GPIO dos genéricos serão sinalizados.</div></details>
 <details class="config-group" open><summary>SENSOR GENÉRICO — slots configuráveis</summary><p class="smallnote"><b>GENERIC_SENSOR V1 + NTC Beta — formulário por interface:</b> configure sensores que não existem no catálogo usando motores já incorporados ao firmware. Selecione a interface para exibir somente os parâmetros correspondentes. O firmware não identifica o sensor pelo nome/modelo.</p><div id="genericSlots"></div></details>
 <details class="config-group"><summary>Correção metrológica — y = a × x + b</summary><p class="smallnote">2 correções metrológicas disponíveis. Escolha o sensor/canal habilitado e depois a grandeza. Vale para sensores nativos e genéricos. Linhas OFF e vazias são ignoradas.<br><b>Separador decimal:</b> use ponto (.) nos coeficientes, por exemplo <b>a = 1.0234</b> e <b>b = -12.5</b>. Não use vírgula.</p><div id="correctionSlots"></div></details>
@@ -147,8 +157,8 @@ details.config-group>summary{font-weight:800;color:#176b3a;cursor:pointer}
 <div class="step">ETAPA 2 — INSTALAÇÃO</div><h2>Instale o SENS</h2>
 <p class="note">O Wi‑Fi automático do ESP Web Tools está desativado nesta versão. Terminada a instalação, use a Etapa 3: ela grava automaticamente o Nome + Serial já salvos e, na mesma conexão USB, segue para a rede.</p>
 <div class="actions">
-<esp-web-install-button manifest="manifest-next-rev03v-do-zero.json"><button slot="activate">INSTALAR SENS DO ZERO</button></esp-web-install-button>
-<esp-web-install-button manifest="manifest-next-rev03v-preservar.json"><button slot="activate">ATUALIZAR — PRESERVAR DADOS</button></esp-web-install-button>
+<esp-web-install-button manifest="manifest-next-rev03p-rtc-do-zero.json"><button slot="activate">INSTALAR SENS DO ZERO</button></esp-web-install-button>
+<esp-web-install-button manifest="manifest-next-rev03p-rtc-preservar.json"><button slot="activate">ATUALIZAR — PRESERVAR DADOS</button></esp-web-install-button>
 <div style="margin-top:8px;font-size:.88rem;line-height:1.35">
   <strong>ATUALIZAR — PRESERVAR DADOS:</strong> mantém NVS/identidade do equipamento
   (Epoch, próximo Seq e configurações). Se o gravador apresentar uma opção de apagar
@@ -181,7 +191,7 @@ details.config-group>summary{font-weight:800;color:#176b3a;cursor:pointer}
 <section class="card" id="configCard">
 <div class="step">CONFIGURAÇÃO GRAVADA NO EQUIPAMENTO</div><h2>Leitura da configuração runtime</h2>
 <p class="note">Espelho da configuração enviada e confirmada pela transação atômica da Rev.15D2.3. O COMMIT valida todos os blocos e gera um snapshot persistente relido da NVS. A senha Wi‑Fi nunca é exibida.</p>
-<table class="config-table"><tr><th>Firmware</th><td>SENS NEXT Universal Rev.03N — NTC Beta / I2C_GENERIC</td></tr><tr><th>Nome</th><td id="cfgName">Aguardando</td></tr><tr><th>Serial / ID SENS</th><td id="cfgSerial">Aguardando</td></tr><tr><th>Projeto</th><td id="cfgProject">Aguardando</td></tr><tr><th>Local</th><td id="cfgLocation">Aguardando</td></tr><tr><th>URL da Platform</th><td id="cfgPlatformUrl">Aguardando</td></tr><tr><th>Papel</th><td id="cfgRole">Aguardando</td></tr><tr><th>Intervalo</th><td id="cfgSend">Aguardando</td></tr><tr><th>Sync Platform</th><td id="cfgSync">Aguardando</td></tr><tr><th>Sensores</th><td id="cfgSensors">Aguardando leitura</td></tr><tr><th>Avançado</th><td id="cfgAdvanced">Aguardando leitura</td></tr><tr><th>Genérico 1</th><td id="cfgGeneric1">Aguardando leitura</td></tr><tr><th>Genérico 2</th><td id="cfgGeneric2">Aguardando leitura</td></tr><tr><th>Correção 1</th><td id="cfgCorrection1">Aguardando leitura</td></tr><tr><th>Correção 2</th><td id="cfgCorrection2">Aguardando leitura</td></tr><tr><th>Transação Rev.15D2.3</th><td id="cfgTransaction">Aguardando COMMIT</td></tr><tr><th>Fingerprint</th><td id="cfgFingerprint">—</td></tr><tr><th>Fonte da identidade</th><td id="cfgIdentitySource">Aguardando confirmação</td></tr><tr><th>Wi‑Fi</th><td id="cfgWifi">Não configurado nesta sessão</td></tr><tr><th>Senha Wi‑Fi</th><td><span class="pill">não exibida</span></td></tr></table>
+<table class="config-table"><tr><th>Firmware</th><td>SENS NEXT Universal Rev.03P — RTC opcional / NTC Beta / I2C_GENERIC</td></tr><tr><th>Nome</th><td id="cfgName">Aguardando</td></tr><tr><th>Serial / ID SENS</th><td id="cfgSerial">Aguardando</td></tr><tr><th>Projeto</th><td id="cfgProject">Aguardando</td></tr><tr><th>Local</th><td id="cfgLocation">Aguardando</td></tr><tr><th>URL da Platform</th><td id="cfgPlatformUrl">Aguardando</td></tr><tr><th>Papel</th><td id="cfgRole">Aguardando</td></tr><tr><th>Intervalo</th><td id="cfgSend">Aguardando</td></tr><tr><th>Sync Platform</th><td id="cfgSync">Aguardando</td></tr><tr><th>Sensores</th><td id="cfgSensors">Aguardando leitura</td></tr><tr><th>Avançado</th><td id="cfgAdvanced">Aguardando leitura</td></tr><tr><th>RTC DS3231</th><td id="cfgRtc">Aguardando leitura</td></tr><tr><th>Genérico 1</th><td id="cfgGeneric1">Aguardando leitura</td></tr><tr><th>Genérico 2</th><td id="cfgGeneric2">Aguardando leitura</td></tr><tr><th>Correção 1</th><td id="cfgCorrection1">Aguardando leitura</td></tr><tr><th>Correção 2</th><td id="cfgCorrection2">Aguardando leitura</td></tr><tr><th>Transação Rev.15D2.3</th><td id="cfgTransaction">Aguardando COMMIT</td></tr><tr><th>Fingerprint</th><td id="cfgFingerprint">—</td></tr><tr><th>Fonte da identidade</th><td id="cfgIdentitySource">Aguardando confirmação</td></tr><tr><th>Wi‑Fi</th><td id="cfgWifi">Não configurado nesta sessão</td></tr><tr><th>Senha Wi‑Fi</th><td><span class="pill">não exibida</span></td></tr></table>
 <div id="cfgPanelStatus" class="status">O painel será atualizado conforme Nome, Serial e Wi‑Fi forem confirmados.</div>
 </section>
 
@@ -200,7 +210,7 @@ details.config-group>summary{font-weight:800;color:#176b3a;cursor:pointer}
 </main><footer>SENS Platform • SENS Installer</footer>
 
 <script type="module">
-import {SensImprov} from './sens-improv.js';
+import {SensImprov} from './sens-improv.js?v=rev03p-rtc';
 
 const $=id=>document.getElementById(id);
 let improv=null, port=null;
@@ -502,7 +512,7 @@ function wireCorrectionMenus(){
 function updateConverterCompatibilityNote(){
   const q=$("conv_qty")?.value||"co2";
   const warn=$("convCompat");
-  if(warn) warn.textContent=q==="co2"?"Compatibilidade do conversor legado preservada no FW03M.":"PREPARADO NO INSTALLER — esta grandeza ainda requer suporte no firmware para virar saída científica.";
+  if(warn) warn.textContent=q==="co2"?"Compatibilidade do conversor legado preservada no FW03P.":"PREPARADO NO INSTALLER — esta grandeza ainda requer suporte no firmware para virar saída científica.";
 }
 
 function applyConverterProfile(){
@@ -520,7 +530,7 @@ $("conv_model")?.addEventListener("input",refreshCorrectionMenus);
 $("conv_qty")?.addEventListener("change",updateConverterCompatibilityNote);
 updateConverterCompatibilityNote();
 
-function advForm(){const tmode=$("s_t6613")?.checked?2:1;return `tmode=${tmode};aif=${$("aif").value};adsch=${$("adsch").value};vin0=${$("vin0").value};vin1=${$("vin1").value};sc0=${$("sc0").value};sc1=${$("sc1").value};div=${$("divider").value};divr=${$("divratio").value};mavg=${$("mavg").value};mwin=${$("mwin").value};warm=${$("warm").value};i_dht=${$("i_dht").value};i_ds=${$("i_ds").value};i_t66=${$("i_t66").value};i_b18=${$("i_b18").value};i_be2=${$("i_be2").value};i_be6=${$("i_be6").value};i_b38=${$("i_b38").value};i_bh=${$("i_bh").value};i_ap=${$("i_ap").value};i_th=${$("i_th").value};i_gps=${$("i_gps").value}`}
+function advForm(){const tmode=$("s_t6613")?.checked?2:1;return `tmode=${tmode};aif=${$("aif").value};adsch=${$("adsch").value};vin0=${$("vin0").value};vin1=${$("vin1").value};sc0=${$("sc0").value};sc1=${$("sc1").value};div=${$("divider").value};divr=${$("divratio").value};mavg=${$("mavg").value};mwin=${$("mwin").value};warm=${$("warm").value};i_dht=${$("i_dht").value};i_ds=${$("i_ds").value};i_t66=${$("i_t66").value};i_b18=${$("i_b18").value};i_be2=${$("i_be2").value};i_be6=${$("i_be6").value};i_b38=${$("i_b38").value};i_bh=${$("i_bh").value};i_ap=${$("i_ap").value};i_th=${$("i_th").value};i_gps=${$("i_gps").value};rtc=${$("rtcEnabled").checked?1:0}`}
 function validateNtcSlots(){
  for(let i=0;i<2;i++){
   if($("g"+i+"_en").value!=="1" || $("g"+i+"_conv").value!=="1")continue;
@@ -567,6 +577,7 @@ function restoreFull(c){
   V("name",c.name||"");V("serial",c.serial||"");V("project",c.project||"");V("location",c.location||"");V("platformUrl",c.platformUrl||"");V("role",c.role||"NORMAL");V("sendSec",c.sendSec||60);$("syncPlatform").checked=c.sync!==false;
   const z=c.sensors||{};if(z.t8100 && z.converter===undefined){z.converter=true;z.convModel=z.convModel||"Telaire T8100";}for(const [id,k] of [["s_dht22","dht22"],["s_t6613","t6613"],["s_converter","converter"],["s_bmp180","bmp180"],["s_bme280","bme280"],["s_bme680","bme680"],["s_bmp388","bmp388"],["s_bh1750","bh1750"],["s_apds","apds"],["s_thermok","thermok"],["s_gps","gps"]])$(id).checked=!!z[k];V("dsMode",z.dsMode||0);V("conv_model",z.convModel||"");V("conv_qty",z.convQty||"co2");V("conv_unit",z.convUnit||"ppm");V("uart_model",z.uartModel||"");V("uart_qty",z.uartQty||"");V("uart_unit",z.uartUnit||"");V("uart_rx",z.uartRx||"16");V("uart_tx",z.uartTx||"17");V("uart_baud",z.uartBaud||"19200");V("uart_proto",z.uartProto||"");
   const a=kvObj(c.advanced||"");for(const [k,id] of Object.entries({tmode:"tmode",aif:"aif",adsch:"adsch",vin0:"vin0",vin1:"vin1",sc0:"sc0",sc1:"sc1",div:"divider",divr:"divratio",mavg:"mavg",mwin:"mwin",warm:"warm",i_dht:"i_dht",i_ds:"i_ds",i_t66:"i_t66",i_b18:"i_b18",i_be2:"i_be2",i_be6:"i_be6",i_b38:"i_b38",i_bh:"i_bh",i_ap:"i_ap",i_th:"i_th",i_gps:"i_gps"}))if(k in a)V(id,a[k]);
+  $("rtcEnabled").checked=String(a.rtc||"0")==="1";
   for(let i=0;i<2;i++){const g=kvObj(c.generics?.[i]||"");for(const k of ["en","id","model","mfr","if","gpio","qty","unit","in0","in1","sc0","sc1","baud","slave","reg","factor","ppu","pwin","total","conv","nr0","nt0","nbeta","nrf","nvref","i2ca","ir1","iv1","ir2","iv2","dr0","dr1","bytes","le","settle","formula","t0","a0","b0","t1","a1","b1","t2","a2","b2","t3","a3","b3","t4","a4","b4"])if(k in g)V(`g${i}_${k}`,g[k]);const q=kvObj(c.corrections?.[i]||"");for(const k of ["sid","qty","a","b","cid","en","ver"])if(k in q)V(`c${i}_${k}`,q[k]);updateCorrectionPreview(i);}syncYFFromSaved(c);
   refreshCorrectionMenus();
 }
@@ -609,12 +620,56 @@ function saveConfig(){
     bme280:$("s_bme280").checked,bme680:$("s_bme680").checked,bmp388:$("s_bmp388").checked,
     bh1750:$("s_bh1750").checked,apds:$("s_apds").checked,thermok:$("s_thermok").checked,
     gps:$("s_gps").checked,dsMode:parseInt($("dsMode").value,10)}};
+  if(!validateRtcResources())return false;
   c.advanced=advForm();c.generics=Array.from({length:2},(_,i)=>genForm(i));c.corrections=Array.from({length:2},(_,i)=>corForm(i));
   if(!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec(?:[?#].*)?$/.test(c.platformUrl)){setStatus("saved","Informe uma URL válida da implantação Web App da SENS Platform (https://script.google.com/macros/s/.../exec).","err");return;}
   localStorage.setItem("sensInstallerNEXTCONVERSORREV02",JSON.stringify(c));
-  setStatus("saved",`Configuração guardada.\nNome: ${name}\nSerial: ${serial}\nPapel: ${c.role}\nIntervalo: ${c.sendSec}s`,"ok");
+  setStatus("saved",`Configuração guardada.\nNome: ${name}\nSerial: ${serial}\nPapel: ${c.role}\nIntervalo: ${c.sendSec}s\nRTC DS3231: ${$("rtcEnabled").checked?"habilitado":"desabilitado"}`,"ok");
   return true;
 }
+
+function validateRtcResources(){
+  if(!$("rtcEnabled").checked)return true;
+  for(let i=0;i<2;i++){
+    if($("g"+i+"_en").value!=="1")continue;
+    const iface=$("g"+i+"_if").value;
+    if(iface==="25"&&Number($("g"+i+"_i2ca").value)===0x68){setStatus("saved","O endereço 0x68 está reservado ao RTC DS3231. Altere o endereço do genérico ou desative o RTC.","err");return false;}
+    if(["10","24"].includes(iface)&&[21,22].includes(Number($("g"+i+"_gpio").value))){setStatus("saved","GPIO21/22 são usados pelo barramento I²C do RTC. Escolha outro GPIO para o genérico.","err");return false;}
+  }
+  return true;
+}
+function renderRtcStatus(raw){
+  const t=kvObj(raw);
+  const enabled=t.enabled==="1",found=t.detected==="1",valid=t.rtcValid==="1";
+  const reason={DESABILITADO:"RTC desabilitado na configuração salva.",NAO_DETECTADO_OU_ERRO_I2C:"RTC não encontrado. Confira ligação e endereço.",PERDA_DE_ALIMENTACAO_AJUSTE_NECESSARIO:"Hora inválida após perda de alimentação. Confira a bateria e ajuste o relógio.",CALENDARIO_INVALIDO:"Calendário do RTC inválido. Ajuste o relógio.",OSCILADOR_DESABILITADO_AJUSTE_NECESSARIO:"O RTC está com o oscilador de bateria desabilitado. Ajuste o relógio para habilitá-lo.",CONFLITO_RECURSOS_GENERICO:"O RTC conflita com o endereço ou os pinos de um sensor genérico.",FALHA_AJUSTE_POR_NTP:"Não foi possível ajustar o RTC pelo NTP. Confira o módulo e a ligação.",FALHA_VERIFICACAO_GRAVACAO:"O RTC não confirmou a hora gravada. Confira a ligação.",OK:"RTC com calendário válido."}[t.reason]||t.reason||"Sem diagnóstico.";
+  const text=`RTC salvo na ESP32: ${enabled?"habilitado":"desabilitado"}\nMódulo: ${found?"detectado":"não detectado"}\nHora do RTC (UTC): ${t.rtc||"inválida / não disponível"}\nHora do sistema (UTC): ${t.now||"ainda sem referência válida"}\nFonte: ${t.source||"UNSYNCED"}\n${reason}`;
+  setStatus("rtcStatus",text,enabled&&valid?"ok":enabled?"warn":"");return t;
+}
+let rtcBusy=false;
+async function rtcAction(setClock=false){
+  if(rtcBusy)return;
+  if(improv||port||monitorRunning){setStatus("rtcStatus","Conclua a operação serial atual e feche o monitor de logs antes de acessar o RTC.","warn");return;}
+  if(!("serial" in navigator)){setStatus("rtcStatus","Use Chrome ou Edge com Web Serial no computador.","err");return;}
+  rtcBusy=true;$("rtcCheck").disabled=true;$("rtcSet").disabled=true;
+  const blocked=["apply","wifiStart","connect","rescan","monitorOpen"].map(id=>[$(id),$(id).disabled]);blocked.forEach(([el])=>el.disabled=true);
+  let client=null;
+  try{
+    if(setClock&&!confirm("Ajustar o RTC e a ESP32 pela hora deste computador? Confira a data e a hora do computador antes de continuar.\nUTC atual: "+new Date().toISOString()))return;
+    const device=await navigator.serial.requestPort();client=new SensImprov(device,console.log);await client.open();await new Promise(r=>setTimeout(r,2400));await client.initialize();
+    const status=renderRtcStatus(await client.sensClockStatus());
+    if(!setClock)return;
+    if(status.enabled!=="1")throw new Error("Marque RTC, guarde a configuração e conclua a Etapa 3 antes de ajustar.");
+    if(status.source==="NTP")throw new Error("O NTP já sincronizou a ESP32 e tem prioridade. Aguarde o ajuste automático do RTC e verifique novamente.");
+    const result=await client.sensClockSet(Math.floor(Date.now()/1000));
+    if(result[2])renderRtcStatus(result[2]);
+    if(result[0]!=="OK")throw new Error(result[1]||"Ajuste não confirmado pelo RTC.");
+    setStatus("rtcStatus",$("rtcStatus").textContent+"\n✓ Ajuste UTC gravado e conferido no RTC.","ok");
+  }catch(e){setStatus("rtcStatus","Não foi possível concluir: "+(e.message||String(e)),"err");}
+  finally{if(client)await client.close();rtcBusy=false;$("rtcCheck").disabled=false;$("rtcSet").disabled=false;blocked.forEach(([el,was])=>el.disabled=was);}
+}
+$("rtcCheck").onclick=()=>rtcAction(false);
+$("rtcSet").onclick=()=>rtcAction(true);
+
 $("save").onclick=saveConfig;
 $("newConfig").onclick=()=>{if(confirm("Limpar a configuração guardada nesta versão e iniciar um novo equipamento?"))clearNewConfig();};
 
@@ -982,6 +1037,10 @@ $("apply").onclick=async()=>{
     await new Promise(r=>setTimeout(r,500));
     setStatus("cfgstatus","Improv pronto. Iniciando gravação com confirmação por leitura...");
 
+    let clockCapability;
+    try{clockCapability=kvObj(await improv.sensClockStatus());}catch(e){throw new Error("Este firmware não confirmou suporte RTC. Instale a Rev.03P na Etapa 2 antes de gravar esta configuração.");}
+    if(!("enabled" in clockCapability))throw new Error("Resposta RTC incompleta. Instale a Rev.03P na Etapa 2 antes de gravar esta configuração.");
+
     setStatus("cfgstatus","1/9 — Identidade: gravando Nome + Serial...");
     let identity=null;
     let identityDetail="";
@@ -1030,6 +1089,7 @@ $("apply").onclick=async()=>{
 
     // Espelho da configuração confirmada pelo COMMIT/fingerprint.
     showRuntime(tx.basic,verifyName,verifySerial);
+    $("cfgRtc").textContent=kvObj(tx.snapshot.A).rtc==="1"?"HABILITADO • confirmado na NVS":"DESABILITADO • confirmado na NVS";
     $("cfgAdvanced").textContent=fmtKv(tx.adv,"advanced");
     $("cfgGeneric1").textContent=fmtKv(tx.g[0],"generic");
     $("cfgGeneric2").textContent=fmtKv(tx.g[1],"generic");

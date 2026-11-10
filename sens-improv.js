@@ -150,6 +150,8 @@ export class SensImprov {
   async sensSetGeneric(i,x){return (await this.rpc(CMD_SENS_SET_GENERIC,[...new TextEncoder().encode(String(i)+"|"+x)],22000))[1]||"";}
   async sensGetCorrection(i){return (await this.rpc(CMD_SENS_GET_CORR,[...new TextEncoder().encode(String(i))],18000))[1]||"";}
   async sensSetCorrection(i,x){return (await this.rpc(CMD_SENS_SET_CORR,[...new TextEncoder().encode(String(i)+"|"+x)],22000))[1]||"";}
+  async sensClockStatus(){return (await this.rpc(0x31,[],12000))[0]||"";}
+  async sensClockSet(epoch){return await this.rpc(0x32,[...new TextEncoder().encode(String(epoch))],12000);}
   async scan(timeout=30000) {
     const rows=await this.rpc(CMD_SCAN,[],timeout,true);
     return rows.map(r=>({name:r[0]||"",rssi:parseInt(r[1]||"-999"),secured:(r[2]||"YES")!=="NO"}))
